@@ -1,0 +1,30 @@
+<page-header ng-click="vm.registerError = false"></page-header>
+<div class="login-header"></div>
+<div class="login-body" ng-click="vm.registerError = false">
+  <div class="login-body-padding">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12 login-form">
+          <h1>Создать учётную запись</h1>
+          <p class="lead">Уже зарегестрированы? <a href="/login">Войти в учётную запись.</a></p>
+          <form ng-submit="vm.createAccount(userName, userEmail, userPassword)">
+            <div role="alert" ng-show="vm.registerError" class="alert alert-danger">{{ vm.registerError }}</div>
+            <div class="form-group">
+              <label for="name">Имя</label>
+              <input type="text" class="form-control" id="name" placeholder="Иван Иванов" required ng-model="userName">
+            </div>
+            <div class="form-group">
+              <label for="email">Электронная почта</label>
+              <input type="email" class="form-control" id="email" placeholder="example@gmail.com" required ng-model="userEmail">
+            </div>
+            <div class="form-group">
+              <label for="password">Пароль</label>
+              <input type="password" class="form-control" minlength="8" pattern="(?=.*\d)(?=.*[a-zа-я])(?=.*[A-ZА-Я]).{8,}" title="Пароль должен содержать как минимум 1 заглавную букву, 1 прописную букву и 1 цифру. Длинна пароля не менее 8 символов." id="password" placeholder="пароль" required ng-model="userPassword">
+            </div>
+            <button type="submit" class="btn btn-default btn-login-register">Зарегестрироваться</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

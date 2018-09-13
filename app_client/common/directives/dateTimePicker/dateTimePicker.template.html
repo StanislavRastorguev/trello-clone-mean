@@ -1,0 +1,20 @@
+<form class="date-time-picker-form" ng-submit="vm.dateTimePicker(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);
+ datePicker ? datePicker = !datePicker : datePicker; datePickerQuickModal ? datePickerQuickModal = !datePickerQuickModal : datePickerQuickModal;
+  datePickerBtnMobile ? datePickerBtnMobile = !datePickerBtnMobile : datePickerBtnMobile">
+  <div class="date-picker">
+    <label>Дата
+      <input ng-model="vm.taskDate" type="date" required/>
+    </label>
+  </div>
+  <div class="time-picker">
+    <label>Время
+      <input ng-model="vm.taskTime" type="time" required/>
+    </label>
+  </div>
+  <div class="add-item-footer date-time-picker-btn-submit">
+    <input class="btn btn-success" type="submit" value="Сохранить"/>
+    <button class="btn btn-danger" type="button" ng-click="vm.dateTimeRemove(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);
+     datePicker ? datePicker = !datePicker : datePicker; datePickerQuickModal ? datePickerQuickModal = !datePickerQuickModal : datePickerQuickModal;
+      datePickerBtnMobile ? datePickerBtnMobile = !datePickerBtnMobile : datePickerBtnMobile">Убрать</button>
+  </div>
+</form>

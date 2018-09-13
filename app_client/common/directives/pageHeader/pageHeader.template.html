@@ -1,0 +1,21 @@
+<div class="my-page-header">
+  <a id="board-title" href="/">
+    <span>Trello-clone</span>
+  </a>
+  <a ng-hide="phvm.isLoggedIn" class="page-header-login" href="/login">
+    <span>Войти</span>
+  </a>
+  <a ng-show="phvm.isLoggedIn" class="page-header-login page-header-account" title="{{ phvm.currentUser.name }}" ng-click="logout = !logout">
+    <span>{{ phvm.currentUser.shortName }}</span>
+  </a>
+  <ul class="dropdown-menu page-header-account-menu" role="menu" click-outside="logout = !logout;" outside-if-not="page-header-account" ng-show="logout">
+    <li class="item-menu-header">
+      <span class="page-header-user-info">{{ phvm.currentUser.name }}</span>
+      <a type="button" class="item-menu-header-btn-close" ng-click="logout = !logout;">
+        <span class="glyphicon glyphicon-remove"></span>
+      </a>
+    </li>
+    <li class="divider"></li>
+    <li><a class="logout-btn" ng-click="phvm.logout(); logout = !logout;">Выйти</a></li>
+  </ul>
+</div>

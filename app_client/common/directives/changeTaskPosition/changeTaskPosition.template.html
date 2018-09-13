@@ -1,0 +1,25 @@
+<form class="item-position-form" role="form" ng-submit="vm.updateTaskPosition(vm.modalListIndex, vm.modalTaskIndex, listIndex, taskIndex-1, vm.modalList, vm.modalTask);
+ vm.modalListIndex = listIndex; vm.modalTaskIndex = taskIndex-1; taskIndex = vm.modalTaskIndex+1;
+  vm.taskEditModal ? vm.taskEdit : vm.taskEdit = !vm.taskEdit;
+   vm.changeTaskPosition ? vm.changeTaskPosition = !vm.changeTaskPosition : vm.changeTaskPosition">
+  <div class="item-position-form-content">
+    <div class="item-position-content item-position-form-content-list">
+      <span class="item-position-content-label">Список</span>
+      <span class="item-position-content-value">{{vm.lists[listIndex].listName}}</span>
+      <select ng-model="listIndex" ng-change="(listIndex == vm.modalListIndex) ? taskIndex = $index + 1 : taskIndex = vm.lists[listIndex].tasks.length + 1;">
+        <option class="option-display" value="{{$index}}" ng-repeat="list in vm.lists">{{listNameForTask = list.listName}}{{(vm.modalListIndex == $index) ? ' (текущий)' : ''}}</option>
+      </select>
+    </div>
+    <div class="item-position-content item-position-form-content-task">
+      <span class="item-position-content-label">Позиция</span>
+      <span class="item-position-content-value">{{taskIndex.slice(0, taskIndex.indexOf(' ')) || taskIndex}}</span>
+      <select ng-model="taskIndex">
+        <option class="option-display" ng-repeat="task in vm.lists[listIndex].tasks">{{$index+1}}{{(vm.modalTaskIndex === $index) && (vm.modalListIndex == listIndex) ? ' (текущая)' : ''}}</option>
+        <option class="option-display" ng-if="vm.modalListIndex != listIndex">{{vm.lists[listIndex].tasks.length+1}}</option>
+      </select>
+    </div>
+  </div>
+  <div class="add-item-footer">
+    <input type="submit" value="Переместить" class="btn btn-success">
+  </div>
+</form>

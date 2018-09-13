@@ -1,0 +1,53 @@
+<div dnd-nodrag class="quick-task-edit task-edit-modal" ng-show="lmvm.loginModal"
+     ng-click="$event.composedPath()[0].className === 'quick-task-edit task-edit-modal' ? lmvm.loginModal = !lmvm.loginModal : lmvm.loginModal">
+  <div class="col-xs-12 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6" ng-click="lmvm.loginError = false; lmvm.registerError = false;">
+    <a type="button" class="btn btn-lg task-edit-modal-btn-close" ng-click="lmvm.loginModal = !lmvm.loginModal">
+      <span class="glyphicon glyphicon-remove"></span>
+    </a>
+    <div class="col-sm-6 col-xs-12">
+      <h3>Войти</h3>
+      <button class="btn btn-default btn-login-social-network" ng-click="lmvm.loginFacebook()">
+        <img src="lib/img/facebook.png" height="16px">
+        <span>Войти с помощью Facebook</span>
+      </button>
+      <button class="btn btn-default btn-login-social-network" ng-click="lmvm.loginGoogle()">
+        <img src="lib/img/google.png" height="16px">
+        <span>Войти с помощью Google</span>
+      </button>
+      <form ng-submit="lmvm.login(loginUserEmail, loginUserPassword)">
+        <div role="alert" ng-if="lmvm.loginError" class="alert alert-danger">{{ lmvm.loginError }}</div>
+        <div class="form-group">
+          <label for="loginemail">Электронная почта</label>
+          <input type="email" class="form-control" id="loginemail" placeholder="example@gmail.com" required
+                 ng-model="loginUserEmail">
+        </div>
+        <div class="form-group">
+          <label for="loginpassword">Пароль</label>
+          <input type="password" class="form-control" id="loginpassword" placeholder="пароль" required
+                 ng-model="loginUserPassword">
+        </div>
+        <button type="submit" class="btn btn-default btn-login-register">Войти</button>
+      </form>
+    </div>
+    <div class="col-sm-6 col-xs-12">
+      <h3>Зарегестрироваться</h3>
+      <form ng-submit="lmvm.createAccount(registerUserName, registerUserEmail, registerUserPassword)">
+        <div role="alert" ng-show="lmvm.registerError" class="alert alert-danger">{{ lmvm.registerError }}</div>
+        <div class="form-group">
+          <label for="name">Имя</label>
+          <input type="text" class="form-control" id="name" placeholder="Иван Иванов" required ng-model="registerUserName">
+        </div>
+        <div class="form-group">
+          <label for="registeremail">Электронная почта</label>
+          <input type="email" class="form-control" id="registeremail" placeholder="example@gmail.com" required ng-model="registerUserEmail">
+        </div>
+        <div class="form-group">
+          <label for="registerpassword">Пароль</label>
+          <input type="password" class="form-control" minlength="8" pattern="(?=.*\d)(?=.*[a-zа-я])(?=.*[A-ZА-Я]).{8,}" title="Пароль должен содержать как минимум 1 заглавную букву, 1 прописную букву и 1 цифру. Длинна пароля не менее 8 символов." id="registerpassword" placeholder="пароль" required ng-model="registerUserPassword">
+        </div>
+        <button type="submit" class="btn btn-default btn-login-register">Зарегестрироваться</button>
+      </form>
+    </div>
+  </div>
+</div>
+

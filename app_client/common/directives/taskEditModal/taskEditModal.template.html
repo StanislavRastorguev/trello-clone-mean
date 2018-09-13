@@ -1,0 +1,301 @@
+<div dnd-nodrag class="quick-task-edit task-edit-modal" ng-show="vm.taskEditModal"
+     ng-click="($event.composedPath()[1].nodeName === 'TASK-EDIT-MODAL' && !modalTaskName &&
+      !dropdownMenuLink && !vm.taskDescriptionForm && !datePicker && !attachments && !dropdownMenuBtn &&
+       !datePickerBtnMobile && !attachmentsBtnMobile && !taskPositionBtnMobile) ? vm.taskEditModal = !vm.taskEditModal : vm.taskEditModal;">
+  <div class="col-xs-12 col-sm-offset-1 col-sm-10 col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6">
+    <div>
+      <a type="button" class="btn btn-lg task-edit-modal-btn-close" ng-click="vm.taskEditModal = !vm.taskEditModal">
+        <span class="glyphicon glyphicon-remove"></span>
+      </a>
+      <!--header-->
+      <div class="task-edit-modal-header">
+        <div id="task-edit-modal-header-title" ng-hide="modalTaskName" ng-click="modalTaskName = !modalTaskName;">{{vm.modalTask.taskName}}</div>
+        <div ng-show="modalTaskName" click-outside="modalTaskName = !modalTaskName; vm.updateTaskName(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.editedTaskName);" outside-if-not="task-edit-modal-header-title">
+          <textarea ng-model="vm.editedTaskName" rows="3" ui-keypress="{'enter' : 'vm.updateTaskName(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.editedTaskName); modalTaskName = !modalTaskName;'}"></textarea>
+        </div>
+        <p>
+          В списке:
+          <a id="move-task-link" ng-click="dropdownMenuLink = !dropdownMenuLink; vm.listNameForTask = vm.modalList.listName; listIndex = vm.modalListIndex; taskIndex = vm.modalTaskIndex+1;">{{vm.listNameForTask}}</a>
+        </p>
+        <ul class="dropdown-menu task-position-menu" click-outside="dropdownMenuLink = !dropdownMenuLink;" outside-if-not="move-task-link" ng-show="dropdownMenuLink">
+          <li class="item-menu-header">
+            <span>Перемещение карточки</span>
+            <a class="btn item-menu-header-btn-close" ng-click="dropdownMenuLink = !dropdownMenuLink">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <change-task-position></change-task-position>
+          </li>
+        </ul>
+      </div>
+      <!--content-->
+      <div class="col-xs-12 col-sm-8 task-edit-modal-content">
+        <div ng-if="vm.modalTask.date" class="task-edit-modal-content-due-date">
+          <div>
+            <h5>Срок</h5>
+          </div>
+          <div class="task-modal-due-date" ng-style="vm.modalTask.status === true ? { 'background-color': '#5aac44' } : vm.modalTask.date > vm.nextDay ? { 'background-color': '#5BC0DE' } : vm.modalTask.date > vm.dateNow ? { 'background-color': '#F0AD4E' } : { 'background-color': '#EB5A46' }"
+               ng-attr-title="{{vm.modalTask.status === true ? 'Карточка выполнена.' : vm.modalTask.date > vm.nextDay ? 'Срок карточки истекает не скоро.' : vm.modalTask.date > vm.dateNow ? 'До истечения срока карточки осталось менее 24ч.' : 'Карточка просрочена!'}}">
+            <div>
+              <div class="for-glyphicon" ng-if="vm.modalTask.status === false" ng-click="vm.updateTaskStatus(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, true);">
+                <span class="glyphicon glyphicon-unchecked task-status-unchecked"></span>
+                <span class="glyphicon glyphicon-check task-status-check"></span>
+              </div>
+              <div class="for-glyphicon" ng-if="vm.modalTask.status === true" ng-click="vm.updateTaskStatus(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, false);">
+                <span class="glyphicon glyphicon-check task-status-checked"></span>
+              </div>
+              <a class="task-due-date" ng-click="vm.dateSetting(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask); datePickerModalContent = !datePickerModalContent">
+                {{vm.modalTask.date | date:'dd MMMM yyyy в HH:mm'}}
+                {{vm.modalTask.status === true ? '' : vm.modalTask.date > vm.nextDay ? ' (истекает не скоро)' : vm.modalTask.date > vm.dateNow ? ' (скоро истечёт)' : ' (срок истёк)'}}
+              </a>
+              <ul class="dropdown-menu task-position-menu task-due-date-picker-menu" click-outside="datePickerModalContent = !datePickerModalContent;" outside-if-not="task-due-date" ng-show="datePickerModalContent">
+                <li class="item-menu-header">
+                  <span>Изменение срока</span>
+                  <a class="btn item-menu-header-btn-close" ng-click="datePickerModalContent = !datePickerModalContent">
+                    <span class="glyphicon glyphicon-remove"></span>
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                  <date-time-picker></date-time-picker>
+                </li>
+                <li class="divider"></li>
+                <li>
+                  <div class="date-time-picker-helper">
+                    Вы можете установить срок для карточки. Формат даты и времени зависит от настроек браузера.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div ng-if="!vm.modalTask.description">
+            <a class="btn btn-block task-description" ng-click="vm.taskDescriptionForm = !vm.taskDescriptionForm; vm.taskDescription = vm.modalTask.description" ng-hide="vm.taskDescriptionForm">
+              <span class="glyphicon glyphicon-align-left"></span>
+              <span>Изменить описание...</span>
+            </a>
+          </div>
+          <div ng-if="vm.modalTask.description">
+            <h5>Описание</h5>
+            <a class="task-description task-description-change" ng-click="vm.taskDescriptionForm = !vm.taskDescriptionForm; vm.taskDescription = vm.modalTask.description" ng-hide="vm.taskDescriptionForm">Изменить</a>
+            <p class="task-description-text" ng-hide="vm.taskDescriptionForm" ng-click="vm.taskDescriptionForm = !vm.taskDescriptionForm; vm.taskDescription = vm.modalTask.description">{{vm.modalTask.description}}</p>
+          </div>
+          <form class="form task-edit-modal-content-form-description" method="post" ng-show="vm.taskDescriptionForm" ng-submit="vm.updateTaskDescription(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.taskDescription)" click-outside="vm.taskDescriptionForm = !vm.taskDescriptionForm;" outside-if-not="task-description, task-description-text">
+            <textarea rows="6" type="text" placeholder="Добавить более подробное описание..." ng-model="vm.taskDescription"
+                      ui-keypress="{'ctrl-enter ctrl-10' : 'vm.updateTaskDescription(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.taskDescription); vm.taskDescriptionForm = !vm.taskDescriptionForm;'}"></textarea>
+            <div class="add-item-footer" ng-click="vm.taskDescriptionForm = !vm.taskDescriptionForm">
+              <input type="submit" value="Сохранить" class="btn btn-success">
+              <a type="button" class="btn btn-lg">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </div>
+          </form>
+        </div>
+        <div ng-if="vm.modalTask.attachments[0]" class="attachments-wrapper">
+          <h4>Вложения</h4>
+          <div class="attachment-wrapper" ng-repeat="attachment in vm.modalTask.attachments" ng-click="($event.composedPath()[1].nodeName !== 'A' && !attachmentRemoveMenu) ? vm.attachmentViewer = !vm.attachmentViewer : vm.attachmentViewer; vm.img = attachment; vm.imgIndex = $index;">
+            <div class="attachment-image" style="background-image: url('{{attachment.path}}');"></div>
+            <p class="attachment-content">
+              <span class="attachment-file-name">{{attachment.originalName}}</span>
+              <span class="attachment-file-date">Добавлено: {{attachment.date | date:'dd MMM HH:mm'}}</span>
+              <a class="attachment-remove-btn" ng-click="attachmentRemoveMenu = !attachmentRemoveMenu">
+                <span>Удалить</span>
+              </a>
+            </p>
+            <ul class="dropdown-menu task-position-menu" ng-show="attachmentRemoveMenu" click-outside="attachmentRemoveMenu = !attachmentRemoveMenu" outside-if-not="attachment-remove-btn">
+              <li class="item-menu-header">
+                <span>Удаление вложения</span>
+                <a class="btn item-menu-header-btn-close" ng-click="attachmentRemoveMenu = !attachmentRemoveMenu">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li class="attachment-remove">
+                <p>После удаления файл восстановить не возможно.</p>
+                <button class="btn btn-block" id="remove-attachment" ng-click="vm.deleteAttachment(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, $index, attachment)">
+                  Удалить
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!--menu-->
+      <div class="hidden-xs col-sm-4 task-edit-modal-menu task-edit-modal-menu-lg">
+        <div class="task-edit-modal-menu-right">
+          <h4>Добавить</h4>
+          <a class="btn btn-default btn-block" id="date-picker-btn" ng-click="datePicker = !datePicker; vm.dateSetting(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);">
+            <span class="glyphicon glyphicon-time"></span>
+            <span>Изменить срок</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu date-picker-menu" click-outside="datePicker = !datePicker;" outside-if-not="date-picker-btn" ng-show="datePicker">
+            <li class="item-menu-header">
+              <span>Изменение срока</span>
+              <a class="btn item-menu-header-btn-close" ng-click="datePicker = !datePicker">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <date-time-picker></date-time-picker>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <div class="date-time-picker-helper">
+                Вы можете установить срок для карточки. Формат даты и времени зависит от настроек браузера.
+              </div>
+            </li>
+          </ul>
+          <a class="btn btn-default btn-block" id="attachment-btn" ng-click="attachments = !attachments; vm.fileUploaderMessage = '';">
+            <span class="glyphicon glyphicon-paperclip"></span>
+            <span>Вложение</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu file-upload-menu" ng-show="attachments" click-outside="attachments = !attachments" outside-if-not="attachment-btn">
+            <li class="item-menu-header">
+              <span>Прикрепить</span>
+              <a class="btn item-menu-header-btn-close" ng-click="attachments = !attachments">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li ng-if="vm.fileUploaderMessage">
+              <div class="alert-file-upload {{vm.alertFileUpload}}">
+                {{vm.fileUploaderMessage}}
+              </div>
+            </li>
+            <li>
+              <form method="post" enctype="multipart/form-data" ng-submit="vm.uploadAttachment($event, vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);">
+                <label class="btn btn-block file-upload-label">С компьютера
+                  <input type="file" id="file" name="fileName" accept=".jpg, .jpeg, .png, .bmp" onchange="angular.element(event.target.form).triggerHandler('submit');"/>
+                </label>
+              </form>
+            </li>
+            <li>
+              <div class="date-time-picker-helper">
+                Вы можете прикрепить файл формата jpeg, png, bmp до 10 МБ.
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="task-edit-modal-menu-right dropdown">
+          <h4>Действия</h4>
+          <a type="button" class="btn btn-default btn-block dropdown-toggle" id="move-task-btn" ng-click="dropdownMenuBtn = !dropdownMenuBtn; vm.listNameForTask = vm.modalList.listName; listIndex = vm.modalListIndex; taskIndex = vm.modalTaskIndex+1;">
+            <span class="glyphicon glyphicon-arrow-right"></span>
+            <span>Переместить</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu task-edit-modal-task-position" click-outside="dropdownMenuBtn = !dropdownMenuBtn" outside-if-not="move-task-btn" ng-show="dropdownMenuBtn">
+            <li class="item-menu-header">
+              <span>Перемещение карточки</span>
+              <a class="btn item-menu-header-btn-close" ng-click="dropdownMenuBtn = !dropdownMenuBtn">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <change-task-position></change-task-position>
+            </li>
+          </ul>
+          <a class="btn btn-default btn-block"  ng-click="vm.deleteTask(vm.modalList, vm.modalListIndex, vm.modalTask, vm.modalTaskIndex); vm.taskEditModal = !vm.taskEditModal; changeTaskPosition ? changeTaskPosition = !changeTaskPosition : changeTaskPosition">
+            <span class="glyphicon glyphicon-trash"></span>
+            <span>Удалить</span>
+          </a>
+        </div>
+      </div>
+      <div class="visible-xs col-xs-12 task-edit-modal-menu">
+        <div>
+          <h4>Добавить</h4>
+          <a class="btn btn-default btn-block" id="date-picker-btn-mobile" ng-click="datePickerBtnMobile = !datePickerBtnMobile; vm.dateSetting(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);">
+            <span class="glyphicon glyphicon-time"></span>
+            <span>Изменить срок</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu task-edit-menu-mobile" click-outside="datePickerBtnMobile = !datePickerBtnMobile;" outside-if-not="date-picker-btn-mobile" ng-show="datePickerBtnMobile">
+            <li class="item-menu-header">
+              <span>Изменение срока</span>
+              <a class="btn item-menu-header-btn-close" ng-click="datePickerBtnMobile = !datePickerBtnMobile">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <date-time-picker></date-time-picker>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <div class="date-time-picker-helper">
+                Вы можете установить срок для карточки. Формат даты и времени зависит от настроек браузера.
+              </div>
+            </li>
+          </ul>
+          <a class="btn btn-default btn-block" id="attachment-btn-mobile" ng-click="attachmentsBtnMobile = !attachmentsBtnMobile; vm.fileUploaderMessage = '';">
+            <span class="glyphicon glyphicon-paperclip"></span>
+            <span>Вложение</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu task-edit-menu-mobile" ng-show="attachmentsBtnMobile" click-outside="attachmentsBtnMobile = !attachmentsBtnMobile" outside-if-not="attachment-btn-mobile">
+            <li class="item-menu-header">
+              <span>Прикрепить</span>
+              <a class="btn item-menu-header-btn-close" ng-click="attachmentsBtnMobile = !attachmentsBtnMobile;">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li ng-if="vm.fileUploaderMessage">
+              <div class="alert-file-upload {{vm.alertFileUpload}}">
+                {{vm.fileUploaderMessage}}
+              </div>
+            </li>
+            <li>
+              <form method="post" enctype="multipart/form-data" ng-submit="vm.uploadAttachment($event, vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask);">
+                <label class="btn btn-block file-upload-label">С компьютера
+                  <input type="file"  id="fileMobile" name="fileName" accept=".jpg, .jpeg, .png, .bmp" onchange="angular.element(event.target.form).triggerHandler('submit');"/>
+                </label>
+              </form>
+            </li>
+            <li>
+              <div class="date-time-picker-helper">
+                Вы можете прикрепить файл формата jpeg, png, bmp до 10 МБ.
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4>Действия</h4>
+          <a type="button" class="btn btn-default btn-block" id="task-position-btn-mobile" ng-click="taskPositionBtnMobile = !taskPositionBtnMobile; vm.listNameForTask = vm.modalList.listName; listIndex = vm.modalListIndex; taskIndex = vm.modalTaskIndex+1;">
+            <span class="glyphicon glyphicon-arrow-right"></span>
+            <span>Переместить</span>
+          </a>
+          <ul class="dropdown-menu task-position-menu task-edit-menu-mobile" ng-show="taskPositionBtnMobile" click-outside="taskPositionBtnMobile = !taskPositionBtnMobile" outside-if-not="task-position-btn-mobile">
+            <li class="item-menu-header">
+              <span>Перемещение карточки</span>
+              <a class="btn item-menu-header-btn-close" ng-click="taskPositionBtnMobile = !taskPositionBtnMobile">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <change-task-position></change-task-position>
+            </li>
+          </ul>
+          <a class="btn btn-default btn-block" ng-click="vm.deleteTask(vm.modalList, vm.modalListIndex, vm.modalTask, vm.modalTaskIndex); vm.taskEditModal = !vm.taskEditModal; changeTaskPosition ? changeTaskPosition = !changeTaskPosition : changeTaskPosition">
+            <span class="glyphicon glyphicon-trash"></span>
+            <span>Удалить</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="attachment-viewer" ng-show="vm.attachmentViewer"
+     ng-click="($event.composedPath()[0].nodeName === 'IMG' || $event.composedPath()[0].nodeName === 'A') ? vm.attachmentViewer : vm.attachmentViewer = !vm.attachmentViewer">
+  <a class="btn btn-lg attachment-btn-close" ng-click="">
+    <span class="glyphicon glyphicon-remove"></span>
+  </a>
+  <img ng-src="{{vm.img.path}}">
+  <div class="attachment-viewer-info">
+    <h3 class="attachment-viewer-info-name">{{vm.img.originalName}}</h3>
+    <p class="attachment-viewer-info-date">Добавлено {{vm.img.date | date:'dd MMMM в HH:mm'}}</p>
+    <a class="attachment-viewer-info-remove" ng-click="vm.deleteAttachment(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.imgIndex, vm.img); vm.attachmentViewer = !vm.attachmentViewer">Удалить</a>
+  </div>
+</div>

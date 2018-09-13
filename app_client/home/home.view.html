@@ -1,0 +1,154 @@
+<page-header></page-header>
+<div class="board-header">
+  <div class="alert alert-danger board-error-message" ng-if="vm.message" click-outside="vm.message=''">
+    <span>{{vm.message}}</span>
+  </div>
+  <a class="btn btn-sm" id="board-menu-btn" ng-click="showMenu = !showMenu">
+    <span id="board-menu-glyphicon" class="glyphicon glyphicon-option-horizontal"></span>
+    <span id="board-menu-btn-name">Меню</span>
+  </a>
+</div>
+<div class="surface" ng-style="{ 'background-color': vm.boardColor }">
+  <ul class="lists-wrapper" dnd-list="vm.lists" dnd-horizontal-list="true" dnd-allowed-types="['list']">
+    <li class="dndPlaceholder" style="height: {{vm.dndPlaceholderHeight}}"></li>
+    <li class="list-wrapper" ng-repeat="list in vm.lists" dnd-draggable="list" dnd-type="'list'" dnd-effect-allowed="move"
+        dnd-dragstart="vm.dndPlaceholderHeight = event.composedPath()[0].clientHeight+'px';" dnd-dragend="vm.dndList($index, list)" dnd-moved="vm.lists.splice($index, 1)">
+      <div class="list">
+        <div class="list-header">
+          <div class="editing-target" id="list-menu-{{list._id}}" ng-click="listTitle = !listTitle; newListName = list.listName" ng-hide="listTitle"></div>
+          <div class="list-title" ng-hide="listTitle">{{list.listName}}</div>
+          <textarea class="list-title show-display" ui-keypress="{'enter': 'vm.updateList(list, $index, newListName); listTitle = !listTitle;'}" ng-model="newListName" spellcheck="false" ng-show="listTitle"
+                    click-outside="vm.updateList(list, $index, newListName); listTitle = !listTitle;" outside-if-not="list-menu-{{list._id}}" dnd-nodrag=""></textarea>
+          <div id="list-menu">
+            <a type="button" class="btn btn-xs" id="list-menu-btn-{{list._id}}" ng-click="listMenu = !listMenu; vm.listMenuPosition($event, list._id);">
+              <span class="glyphicon glyphicon-option-horizontal"></span>
+            </a>
+            <ul class="dropdown-menu" ng-class="vm.listPositionMenu" role="menu" ng-show="listMenu" click-outside="listMenu = !listMenu;" outside-if-not="list-menu-btn-{{list._id}}, btn-back">
+              <li class="item-menu-header">
+                <span>Действия со списком</span>
+                <a type="button" class="item-menu-header-btn-close" ng-click="listMenu = !listMenu;">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li><a id="list-menu-btn-add-task-top" ng-click="addTaskTop = !addTaskTop; listMenu = !listMenu;">Добавить карточку...</a></li>
+              <li><a id="list-menu-btn-move" ng-click="listMenuSwitch = !listMenuSwitch; listMenu = !listMenu; newListIndex = $index + 1">Переместить список...</a></li>
+              <li class="divider"></li>
+              <li><a ng-click="vm.deleteList(list, $index)">Удалить список</a></li>
+            </ul>
+            <ul class="dropdown-menu" ng-class="vm.listPositionMenu" ng-show="listMenuSwitch" click-outside="listMenuSwitch = !listMenuSwitch;" outside-if-not="list-menu-btn-move">
+              <li class="item-menu-header">
+                <a type="button" class="btn-back" ng-click="listMenuSwitch = !listMenuSwitch; listMenu = !listMenu;">
+                  <span class="glyphicon glyphicon-arrow-left"></span>
+                </a>
+                <span>Перемещение списка</span>
+                <a type="button" class="item-menu-header-btn-close" ng-click="listMenuSwitch = !listMenuSwitch;">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <form class="item-position-form" role="form">
+                  <div class="item-position-content">
+                    <span class="item-position-content-label">Позиция</span>
+                    <span class="item-position-content-value">{{newListIndex}}</span>
+                    <select ng-model="newListIndex">
+                      <option class="option-display" ng-repeat="list in vm.lists">{{$index+1}}{{(newListIndex === $index+1) ? ' текущая' : ''}}</option>
+                    </select>
+                  </div>
+                  <div class="add-item-footer">
+                    <input type="submit" value="Переместить" class="btn btn-success" ng-click="listMenuSwitch=''; vm.updateListPosition($index, newListIndex-1, list)">
+                  </div>
+                </form>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div ng-show="addTaskTop" click-outside="addTaskTop = !addTaskTop;" outside-if-not="list-menu-btn-add-task-top" dnd-nodrag>
+          <form class="form add-task-form" method="post" ng-submit="vm.createTask(list, $index, taskName, 'top')">
+            <textarea type="text" ng-model="taskName" ui-keypress="{'enter' : 'vm.createTask(list, $index, taskName, \'top\'); taskName = \'\'; $event.preventDefault()'}"></textarea>
+            <div class="add-item-footer">
+              <input type="submit" value="Добавить" class="btn btn-success">
+              <a type="button" class="btn btn-lg" ng-click="addTaskTop = !addTaskTop; taskName = ''">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </div>
+          </form>
+        </div>
+        <div class="list-content" dnd-nodrag>
+          <ul class="list-body" dnd-list="list.tasks" dnd-allowed-types="['task']">
+            <li class="dndPlaceholder" style="height: {{vm.dndPlaceholderHeight}}"></li>
+            <li ng-repeat="task in list.tasks" dnd-draggable="task" dnd-type="'task'" dnd-effect-allowed="move" dnd-dragstart="vm.dndPlaceholderHeight = event.composedPath()[0].clientHeight+'px';" dnd-dragend="vm.dndTask($parent.$index, $index, list, task)" dnd-moved="list.tasks.splice($index, 1);">
+              <a type="button" class="btn btn-default btn-block task" ng-click="vm.authenticationCheck(); vm.isLoggedIn ? vm.taskEdit ? vm.taskEdit : vm.taskEditModal = !vm.taskEditModal : lmvm.loginModal = !lmvm.loginModal; vm.taskEditor($event, list, $parent.$index, task, $index);">
+                <span>{{task.taskName}}</span>
+                <button class="hidden-xs btn btn-xs task-btn" ng-click="vm.authenticationCheck(); vm.isLoggedIn ? vm.taskEdit = !vm.taskEdit : vm.taskEdit;">
+                  <span class="glyphicon glyphicon-pencil"></span>
+                </button>
+                <div class="task-footer">
+                  <div class="task-footer-due-date" ng-style="task.status === true ? { 'background-color': '#5aac44' } : task.date > vm.nextDay ? { 'background-color': '#5BC0DE' } : task.date > vm.dateNow ? { 'background-color': '#F0AD4E' } : { 'background-color': '#EB5A46' }"
+                       ng-if="task.date" ng-attr-title="{{task.status === true ? 'Карточка выполнена.' : task.date > vm.nextDay ? 'Срок карточки истекает не скоро.' : task.date > vm.dateNow ? 'До истечения срока карточки осталось менее 24ч.' : 'Карточка просрочена!'}}">
+                    <span class="glyphicon glyphicon-time"></span>
+                    <span>{{task.date | date : 'd MMM yyyy'}}</span>
+                  </div>
+                  <div ng-if="task.description" title="Эта карточка с описанием">
+                    <span class="glyphicon glyphicon-align-justify"></span>
+                  </div>
+                  <div ng-if="task.attachments[0]" title="Вложения">
+                    <span class="glyphicon glyphicon-paperclip"></span>
+                    <span>{{task.attachments.length}}</span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="add-task-bottom" ng-show="addTask" click-outside="addTask = !addTask; vm.test1($index, list);" outside-if-not="list-footer-{{list._id}}" dnd-nodrag>
+          <form class="form add-task-form" method="post" ng-submit="vm.createTask(list, $index, taskName); taskName = ''">
+            <textarea type="text" ng-model="taskName" ui-keypress="{'enter' : 'vm.createTask(list, $index, taskName); taskName = \'\'; $event.preventDefault()'}"></textarea>
+            <div class="add-item-footer">
+              <input type="submit" value="Добавить" class="btn btn-success">
+              <a type="button" class="btn btn-lg" ng-click="addTask = !addTask; taskName = ''">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </div>
+          </form>
+        </div>
+        <a ng-hide="addTask" class="list-footer" id="list-footer-{{list._id}}" dnd-nodrag ng-click="addTask = !addTask; vm.test1($index, list);">Добавить карточку...</a>
+      </div>
+    </li>
+  </ul>
+  <div id="new-list-wrapper">
+    <div id="add-new-list" ng-class="newListBtn">
+      <div id="add-new-list-btn" ng-click="newList = !newList; newListBtn='new-list-btn'" ng-hide="newList">
+        <span>Добавить список...</span>
+      </div>
+      <form class="form" method="post" ng-show="newList" click-outside="newList = false; newListBtn=''" outside-if-not="add-new-list-btn" ng-submit="vm.createList(newListName); newListName = ''">
+        <input type="text" placeholder="Добавить список..." ng-model="newListName">
+        <div class="add-item-footer">
+          <input type="submit" value="Сохранить" class="btn btn-success">
+          <a type="button" class="btn btn-lg" ng-click="newList = !newList; newListBtn=''" >
+            <span class="glyphicon glyphicon-remove"></span>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="board-menu" ng-show="showMenu" click-outside="showMenu = !showMenu;" outside-if-not="board-menu-btn">
+  <div id="board-menu-header">
+    <span id="board-menu-title">Цвета</span>
+    <a type="button" class="btn btn-lg" id="board-menu-close-btn" ng-click="showMenu = !showMenu">
+      <span class="glyphicon glyphicon-remove"></span>
+    </a>
+    <hr id="board-menu-divider">
+  </div>
+  <div id="board-menu-content">
+    <div class="col-xs-6" ng-repeat="color in vm.colors" ng-click="vm.updateBoard(color, vm.lists)">
+      <div ng-style="{'background-color': color}" id="board-menu-color"></div>
+    </div>
+  </div>
+</div>
+<quick-task-edit-modal></quick-task-edit-modal>
+<task-edit-modal></task-edit-modal>
+<login-modal></login-modal>
+

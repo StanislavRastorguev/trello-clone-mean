@@ -1,0 +1,60 @@
+<div dnd-nodrag class="quick-task-edit" ng-show="vm.taskEdit"
+     ng-click="($event.composedPath()[1].nodeName === 'QUICK-TASK-EDIT-MODAL' && !vm.changeTaskPosition && !datePickerQuickModal) ? vm.taskEdit = !vm.taskEdit : vm.taskEdit;">
+  <div ng-style="{'top': vm.taskEditCoordY+'px', 'left': vm.taskEditCoordX+'px', 'width': vm.taskEditWidth+'px'}">
+    <form class="form quick-task-edit-form" method="post" ng-submit="vm.taskEdit = !vm.taskEdit; vm.changeTaskPosition ? vm.changeTaskPosition = !vm.changeTaskPosition : vm.changeTaskPosition; vm.updateTaskName(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask, vm.editedTaskName);">
+      <div>
+        <textarea type="text" ng-model="vm.editedTaskName" ng-click="vm.changeTaskPosition ? vm.changeTaskPosition = !vm.changeTaskPosition : vm.changeTaskPosition"></textarea>
+      </div>
+      <div class="add-item-footer">
+        <input type="submit" value="Сохранить" class="btn btn-success">
+        <a type="button" class="btn btn-lg" ng-click="vm.taskEdit = !vm.taskEdit; vm.changeTaskPosition ? vm.changeTaskPosition = !vm.changeTaskPosition : vm.changeTaskPosition">
+          <span class="glyphicon glyphicon-remove"></span>
+        </a>
+      </div>
+    </form>
+    <div class="quick-task-edit-buttons" ng-class="vm.editTaskMenuLeft">
+      <a type="button" class="dropdown-toggle" id="quick-task-edit-position-btn" ng-click="vm.changeTaskPosition = !vm.changeTaskPosition; listNameForTask = vm.modalList.listName; listIndex = vm.modalListIndex; taskIndex = vm.modalTaskIndex+1;">
+        <span class="glyphicon glyphicon-arrow-right"></span>
+        <span>Переместить</span>
+      </a>
+      <ul class="dropdown-menu task-position-menu" ng-class="[vm.taskPositionMenu, vm.taskVerticalPositionMenu]" ng-show="vm.changeTaskPosition" role="menu" click-outside="vm.changeTaskPosition = !vm.changeTaskPosition;" outside-if-not="quick-task-edit-position-btn">
+        <li class="item-menu-header">
+          <span>Перемещение карточки</span>
+          <a class="btn item-menu-header-btn-close" ng-click="vm.changeTaskPosition = !vm.changeTaskPosition">
+            <span class="glyphicon glyphicon-remove"></span>
+          </a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <change-task-position></change-task-position>
+        </li>
+      </ul>
+      <a type="button" class="dropdown-toggle" id="quick-modal-date-picker-btn" ng-click="vm.dateSetting(vm.modalListIndex, vm.modalTaskIndex, vm.modalList, vm.modalTask); datePickerQuickModal = !datePickerQuickModal;">
+        <span class="glyphicon glyphicon-time"></span>
+        <span>Изменить срок</span>
+      </a>
+      <ul class="dropdown-menu task-position-menu quick-task-edit-date-picker-menu" ng-class="[vm.taskPositionMenu, vm.taskVerticalPositionDatePicker]" ng-show="datePickerQuickModal" click-outside="datePickerQuickModal = !datePickerQuickModal;" outside-if-not="quick-modal-date-picker-btn">
+        <li class="item-menu-header">
+          <span>Изменение срока</span>
+          <a class="btn item-menu-header-btn-close" ng-click="datePickerQuickModal = !datePickerQuickModal">
+            <span class="glyphicon glyphicon-remove"></span>
+          </a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <date-time-picker></date-time-picker>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <div class="date-time-picker-helper">
+            Вы можете установить срок для карточки. Формат даты и времени зависит от настроек браузера.
+          </div>
+        </li>
+      </ul>
+      <a ng-click="vm.deleteTask(vm.modalList, vm.modalListIndex, vm.modalTask, vm.modalTaskIndex); vm.taskEdit = !vm.taskEdit; vm.changeTaskPosition ? vm.changeTaskPosition = !vm.changeTaskPosition : vm.changeTaskPosition">
+        <span class="glyphicon glyphicon-trash"></span>
+        <span>Удалить</span>
+      </a>
+    </div>
+  </div>
+</div>
