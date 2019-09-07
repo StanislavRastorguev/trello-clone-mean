@@ -1,14 +1,12 @@
 (() => {
-
-  let taskEditModal = (() => {
+  const taskEditModal = () => {
     return {
       restrict: 'EA',
-      templateUrl: '/common/directives/taskEditModal/taskEditModal.template.html'
+      templateUrl:
+        '/common/directives/taskEditModal/taskEditModal.template.html',
     };
-  });
+  };
 
-  angular
-    .module('trelloClone')
-    .directive('taskEditModal', taskEditModal);
-
+  // eslint-disable-next-line no-undef
+  angular.module('trelloClone').directive('taskEditModal', taskEditModal);
 })();

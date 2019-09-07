@@ -1,14 +1,11 @@
 (() => {
-
-  let messageFactory = (() => {
-    //message for send between home and login pages
+  const messageFactory = () => {
+    // message for send between home and login pages
     return {
-      message: ''
+      message: '',
     };
-  });
+  };
 
-  angular
-    .module('trelloClone')
-    .factory('messageFactory', messageFactory);
-
+  // eslint-disable-next-line no-undef
+  angular.module('trelloClone').factory('messageFactory', messageFactory);
 })();

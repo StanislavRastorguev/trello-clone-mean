@@ -1,55 +1,54 @@
-const mongoose = require('mongoose'),
-  bcrypt = require('bcrypt'),
-  jwt = require('jsonwebtoken'),
-  saltRounds = 10;
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-let userSchema = new mongoose.Schema({
+const saltRounds = 10;
+
+const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    required: true
+    required: true,
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
-  hash: String
+  hash: String,
 });
 
-userSchema.methods.setPassword = (password) => {
-  return bcrypt.hash(password, saltRounds);
-};
+userSchema.methods.setPassword = password => bcrypt.hash(password, saltRounds);
 
-userSchema.methods.verifyPassword = (password, hash) => {
-  return bcrypt.compare(password, hash)
-    .then((res) => {
-      return res;
-    })
-    .catch((err) => {
+userSchema.methods.verifyPassword = (password, hash) =>
+  bcrypt
+    .compare(password, hash)
+    .then(res => res)
+    .catch(err => {
+      // eslint-disable-next-line no-console
       console.log(err);
-    })
-};
+    });
 
-userSchema.methods.generateJwt = (user) => {
-  let expiry = new Date();
+userSchema.methods.generateJwt = user => {
+  const expiry = new Date();
   expiry.setDate(expiry.getDate() + 7);
 
-  return jwt.sign({
-    _id: user._id,
-    exp: parseInt(expiry.getTime() / 1000)
-  }, process.env.JWT_SECRET);
+  return jwt.sign(
+    {
+      _id: user._id,
+      exp: parseInt(expiry.getTime() / 1000, 10),
+    },
+    process.env.JWT_SECRET
+  );
 };
 
-userSchema.methods.verifyJwt = (token) => {
-  return jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+userSchema.methods.verifyJwt = token =>
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return err;
-    } else {
-      return {
-        token: decoded
-      };
     }
+    return {
+      token: decoded,
+    };
   });
-};
 
 mongoose.model('User', userSchema);

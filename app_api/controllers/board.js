@@ -1,82 +1,76 @@
 const mongoose = require('mongoose');
+
 const Board = mongoose.model('Board');
 
-//json response and status code to client side
-let sendJsonResponse = (res, status, content) => {
+// json response and status code to client side
+const sendJsonResponse = (res, status, content) => {
   res.status(status);
   res.json(content);
 };
 
-//get board or create if it doesn't exist
+// get board or create if it doesn't exist
 module.exports.readBoard = (req, res) => {
-
-  Board.find()
-    .exec((err, board) => {
-      if (board && board.length === 0) {
-        Board.create({}, (err, board) => {
-          if (err) {
-            sendJsonResponse(res, 404, err);
-          } else {
-            let boards = [board];
-            sendJsonResponse(res, 201, boards);
-          }
-        })
-      } else if (err) {
-        sendJsonResponse(res, 404, err);
-      } else {
-        sendJsonResponse(res, 200, board);
-      }
-    });
-
+  Board.find().exec((err, board) => {
+    if (board && board.length === 0) {
+      Board.create({}, (error, newBoard) => {
+        if (error) {
+          sendJsonResponse(res, 404, error);
+        } else {
+          const boards = [newBoard];
+          sendJsonResponse(res, 201, boards);
+        }
+      });
+    } else if (err) {
+      sendJsonResponse(res, 404, err);
+    } else {
+      sendJsonResponse(res, 200, board);
+    }
+  });
 };
 
-//update board information or color
+// update board information or color
 module.exports.updateBoard = (req, res) => {
-
-  //check information from client for update
-  let boardid = req.params.boardid;
+  // check information from client for update
+  const { boardid } = req.params;
   const { color, lists } = req.body;
-  if (!color || !lists ) {
+  if (!color || !lists) {
     sendJsonResponse(res, 400, {
-      "message": "Color and lists are required"
+      message: 'Color and lists are required',
     });
-    return
+    return;
   }
   if (!boardid) {
     sendJsonResponse(res, 400, {
-      "message": "Boardid is required"
+      message: 'Boardid is required',
     });
     return;
   }
 
-  //find board by id
-  Board.findById(boardid)
-    .exec((err, board) => {
-      if (!board) {
-        sendJsonResponse(res, 404, {
-          "message": "Board not found"
-        });
-      } else if (err) {
-        sendJsonResponse(res, 404, err);
-      } else {
-        if (board.lists.length !== lists.length) {
-          sendJsonResponse(res, 404, {
-            "message": "Wrong array of lists"
-          });
+  // find board by id
+  Board.findById(boardid).exec((err, board) => {
+    if (!board) {
+      sendJsonResponse(res, 404, {
+        message: 'Board not found',
+      });
+    } else if (err) {
+      sendJsonResponse(res, 404, err);
+    } else if (board.lists.length !== lists.length) {
+      sendJsonResponse(res, 404, {
+        message: 'Wrong array of lists',
+      });
+    } else {
+      // update board and save
+      // eslint-disable-next-line no-param-reassign
+      board.color = color;
+      // eslint-disable-next-line no-param-reassign
+      board.lists = lists;
+      board.save((error, newBoard) => {
+        if (error) {
+          sendJsonResponse(res, 404, error);
         } else {
-
-          //update board and save
-          board.color = color;
-          board.lists = lists;
-          board.save((err, newBoard) => {
-            if (err) {
-              sendJsonResponse(res, 404, err);
-            } else {
-              sendJsonResponse(res, 200, newBoard);
-            }
-          })
+          sendJsonResponse(res, 200, newBoard);
         }
-      }
-    });
-
+      });
+    }
+  });
 };

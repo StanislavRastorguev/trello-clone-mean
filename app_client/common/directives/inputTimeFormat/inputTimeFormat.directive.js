@@ -1,24 +1,20 @@
 (() => {
-
-  let input = (() => {
-    //format datetime picker for Firefox
+  const input = () => {
+    // format datetime picker for Firefox
     return {
       require: '?ngModel',
-      link: function(scope, elem, attr, ngModel) {
-        if( !ngModel )
-          return;
-        if( attr.type !== 'time' )
-          return;
+      link(scope, elem, attr, ngModel) {
+        if (!ngModel) return;
+        if (attr.type !== 'time') return;
 
+        // eslint-disable-next-line func-names
         ngModel.$formatters.unshift(function(value) {
-          return value.replace(/:00\.000$/, '')
+          return value.replace(/:00\.000$/, '');
         });
-      }
-    }
-  });
+      },
+    };
+  };
 
-  angular
-    .module('trelloClone')
-    .directive('input', input);
-
+  // eslint-disable-next-line no-undef
+  angular.module('trelloClone').directive('input', input);
 })();

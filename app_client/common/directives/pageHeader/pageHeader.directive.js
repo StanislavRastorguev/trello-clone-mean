@@ -1,15 +1,12 @@
 (() => {
-
-  let pageHeader = (() => {
+  const pageHeader = () => {
     return {
       restrict: 'EA',
       templateUrl: '/common/directives/pageHeader/pageHeader.template.html',
-      controller: 'pageHeaderCtrl as phvm'
+      controller: 'pageHeaderCtrl as phvm',
     };
-  });
+  };
 
-  angular
-    .module('trelloClone')
-    .directive('pageHeader', pageHeader);
-
+  // eslint-disable-next-line no-undef
+  angular.module('trelloClone').directive('pageHeader', pageHeader);
 })();

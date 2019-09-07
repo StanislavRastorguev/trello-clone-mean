@@ -1,14 +1,12 @@
 (() => {
-
-  let dateTimePicker = (() => {
+  const dateTimePicker = () => {
     return {
       restrict: 'EA',
-      templateUrl: '/common/directives/dateTimePicker/dateTimePicker.template.html'
+      templateUrl:
+        '/common/directives/dateTimePicker/dateTimePicker.template.html',
     };
-  });
+  };
 
-  angular
-    .module('trelloClone')
-    .directive('dateTimePicker', dateTimePicker);
-
+  // eslint-disable-next-line no-undef
+  angular.module('trelloClone').directive('dateTimePicker', dateTimePicker);
 })();

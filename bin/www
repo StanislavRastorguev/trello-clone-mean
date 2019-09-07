@@ -4,15 +4,17 @@
  * Module dependencies.
  */
 
-const app = require('../app');
-const debug = require('debug')('trello-clone:server');
+const createSocket = require('socket.io');
 const http = require('http');
+const debug = require('debug')('trello-clone:server');
+const app = require('../app');
 
 /**
  * Get port from environment and store in Express.
  */
 
-let port = normalizePort(process.env.PORT || '3000');
+// eslint-disable-next-line no-use-before-define
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
@@ -24,49 +26,57 @@ const server = http.createServer(app);
 /**
  * Add sockets for update information between users
  */
-const io = require('socket.io')(server);
+const io = createSocket(server);
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
+  // eslint-disable-next-line no-console
   console.log('a user has connected');
   socket.on('disconnect', () => {
+    // eslint-disable-next-line no-console
     console.log('user disconnected');
   });
 
-  //update board information
-  socket.on('boardServer', (data) => {
-    socket.broadcast.emit('boardClient', { boardColor: data.boardColor, lists: data.lists });
+  // update board information
+  socket.on('boardServer', data => {
+    socket.broadcast.emit('boardClient', {
+      boardColor: data.boardColor,
+      lists: data.lists,
+    });
   });
 
-  //update list information in modal window
-  socket.on('modalListServer', (data) => {
+  // update list information in modal window
+  socket.on('modalListServer', data => {
     io.sockets.emit('modalListClient', {
       modalList: data.modalList,
       modalListIndex: data.modalListIndex,
     });
   });
 
-  //update task information in modal window
-  socket.on('modalTaskServer', (data) => {
+  // update task information in modal window
+  socket.on('modalTaskServer', data => {
     io.sockets.emit('modalTaskClient', {
       modalList: data.modalList,
       modalListIndex: data.modalListIndex,
       modalTask: data.modalTask,
       modalTaskIndex: data.modalTaskIndex,
       editedTaskName: data.modalTask.taskName,
-      listNameForTask: data.modalList.listName
+      listNameForTask: data.modalList.listName,
     });
   });
-
 });
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port, function () {
-  console.log('listening on port ' + port);
+// eslint-disable-next-line func-names
+server.listen(port, function() {
+  // eslint-disable-next-line no-console
+  console.log(`listening on port ${port}`);
 });
+// eslint-disable-next-line no-use-before-define
 server.on('error', onError);
+// eslint-disable-next-line no-use-before-define
 server.on('listening', onListening);
 
 /**
@@ -74,8 +84,10 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  let port = parseInt(val, 10);
+  // eslint-disable-next-line no-shadow
+  const port = parseInt(val, 10);
 
+  // eslint-disable-next-line no-restricted-globals
   if (isNaN(port)) {
     // named pipe
     return val;
@@ -98,18 +110,18 @@ function onError(error) {
     throw error;
   }
 
-  let bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof port === 'string' ? `Pipe ${  port}` : `Port ${  port}`;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      // eslint-disable-next-line no-console
+      console.error(`${bind  } requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      // eslint-disable-next-line no-console
+      console.error(`${bind  } is already in use`);
       process.exit(1);
       break;
     default:
@@ -122,10 +134,7 @@ function onError(error) {
  */
 
 function onListening() {
-  let addr = server.address();
-  let bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? `pipe ${  addr}` : `port ${  addr.port}`;
+  debug(`Listening on ${bind}`);
 }
-

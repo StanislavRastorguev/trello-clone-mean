@@ -1,122 +1,127 @@
 (() => {
+  // eslint-disable-next-line no-undef,no-use-before-define
+  angular.module('trelloClone').service('authentication', authentication);
 
-  angular
-    .module('trelloClone')
-    .service('authentication', authentication);
-
+  // eslint-disable-next-line no-use-before-define
   authentication.$inject = ['$http', '$window'];
   function authentication($http, $window) {
-
-    let saveToken = (token) => {
+    const saveToken = token => {
+      // eslint-disable-next-line no-param-reassign
       $window.localStorage['trello-clone'] = token;
     };
 
-    let getToken = () => {
+    const getToken = () => {
       return $window.localStorage['trello-clone'];
     };
 
-    let saveUserName = (userName, shortUserName) => {
+    const saveUserName = (userName, shortUserName) => {
+      // eslint-disable-next-line no-param-reassign
       $window.localStorage['trello-clone-user-name'] = userName;
+      // eslint-disable-next-line no-param-reassign
       $window.localStorage['trello-clone-short-user-name'] = shortUserName;
     };
 
-    let getShortUserName = (userName) => {
+    const getShortUserName = userName => {
       let shortName;
       if (userName.split(' ')[1]) {
-        shortName = userName.split(' ')[0].split('')[0] + userName.split(' ')[1].split('')[0];
+        shortName =
+          userName.split(' ')[0].split('')[0] +
+          userName.split(' ')[1].split('')[0];
       } else if (userName.split('')[1]) {
-        shortName = userName.split(' ')[0].split('')[0] + userName.split(' ')[0].split('')[1];
+        shortName =
+          userName.split(' ')[0].split('')[0] +
+          userName.split(' ')[0].split('')[1];
       } else {
+        // eslint-disable-next-line prefer-destructuring
         shortName = userName.split('')[0];
       }
       shortName = shortName.toUpperCase();
       return {
         name: userName,
-        shortName
+        shortName,
       };
     };
 
-    let logout = () => {
+    const logout = () => {
       $window.localStorage.removeItem('trello-clone');
       $window.localStorage.removeItem('trello-clone-user-name');
       $window.localStorage.removeItem('trello-clone-short-user-name');
     };
 
-    let isLoggedIn = () => {
-      let token = getToken();
+    const isLoggedIn = () => {
+      const token = getToken();
 
       if (token) {
-        let payload = JSON.parse($window.atob(token.split('.')[1]));
+        const payload = JSON.parse($window.atob(token.split('.')[1]));
 
         return payload.exp > Date.now() / 1000;
-      } else {
-        return false;
       }
+      return false;
     };
 
-    let currentUser = function() {
+    // eslint-disable-next-line consistent-return,func-names
+    const currentUser = function() {
       if (isLoggedIn()) {
-        let userName = $window.localStorage['trello-clone-user-name'],
-          shortUserName = $window.localStorage['trello-clone-short-user-name'];
+        const userName = $window.localStorage['trello-clone-user-name'];
+        const shortUserName =
+          $window.localStorage['trello-clone-short-user-name'];
 
         if (userName && shortUserName) {
           return {
             name: userName,
-            shortName: shortUserName
+            shortName: shortUserName,
           };
-        } else {
-          let token = getToken();
-
-          return $http.get(`/api/userinfo/${token}`, {
-            headers: {
-              Authorization: 'Bearer ' + token
-            }
-          })
-            .then((userData) => {
-              let userInfo = getShortUserName(userData.data);
-              saveUserName(userInfo.name, userInfo.shortName);
-              return {
-                name: userInfo.name,
-                shortName:userInfo.shortName
-              }
-            })
         }
+        const token = getToken();
+
+        return $http
+          .get(`/api/userinfo/${token}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(userData => {
+            const userInfo = getShortUserName(userData.data);
+            saveUserName(userInfo.name, userInfo.shortName);
+            return {
+              name: userInfo.name,
+              shortName: userInfo.shortName,
+            };
+          });
       }
     };
 
-    let registerUser = (userData) => {
-      return $http.post(`/api/register`, userData)
-        .then((data) => {
-          saveToken(data.data.token);
-          let userInfo = getShortUserName(data.data.name);
-          saveUserName(userInfo.name, userInfo.shortName);
-        })
+    const registerUser = userData => {
+      return $http.post(`/api/register`, userData).then(data => {
+        saveToken(data.data.token);
+        const userInfo = getShortUserName(data.data.name);
+        saveUserName(userInfo.name, userInfo.shortName);
+      });
     };
 
-    let login = (userData) => {
-      return $http.post(`/api/login`, userData)
-        .then((data) => {
-          saveToken(data.data.token);
-          let userInfo = getShortUserName(data.data.name);
-          saveUserName(userInfo.name, userInfo.shortName);
-        })
+    const login = userData => {
+      return $http.post(`/api/login`, userData).then(data => {
+        saveToken(data.data.token);
+        const userInfo = getShortUserName(data.data.name);
+        saveUserName(userInfo.name, userInfo.shortName);
+      });
     };
 
-    let loginFacebook = () => {
+    const loginFacebook = () => {
       window.location.replace('http://localhost:3000/api/auth/facebook');
     };
 
-    let loginGoogle = () => {
+    const loginGoogle = () => {
       window.location.replace('http://localhost:3000/api/auth/google');
     };
 
-    /*let loginFacebook = () => {
+    /* let loginFacebook = () => {
       window.location.replace('https://trello-clone-mean.herokuapp.com/api/auth/facebook');
     };
 
     let loginGoogle = () => {
       window.location.replace('https://trello-clone-mean.herokuapp.com/api/auth/google');
-    };*/
+    }; */
 
     return {
       getToken,
@@ -127,9 +132,7 @@
       login,
       logout,
       loginFacebook,
-      loginGoogle
-    }
-
+      loginGoogle,
+    };
   }
-
 })();

@@ -1,246 +1,248 @@
 const mongoose = require('mongoose');
+
 const Board = mongoose.model('Board');
 const fs = require('fs-extra');
 
-//json response and status code to client side
-let sendJsonResponse = (res, status, content) => {
+// json response and status code to client side
+const sendJsonResponse = (res, status, content) => {
   res.status(status);
   res.json(content);
 };
 
-//create task in list
-module.exports.createTask = (req, res) => {
-
-  const { boardid, listid} = req.params;
-  let taskName = req.body.taskName;
-
-  //check task information
-  if (!taskName) {
-    sendJsonResponse(res, 400, {
-      "message": "Task name format: {'taskName': 'name'}"
-    });
-    return;
-  }
-  if (!boardid || !listid) {
-    sendJsonResponse(res, 400, {
-      "message": "BoardID and listID are both required"
-    });
-    return;
-  }
-
-  //find board by id
-  Board.findById(boardid)
-    .select('lists')
-    .exec((err, board) => {
-      if (!board) {
-        sendJsonResponse(res, 404, {
-          "message": "Board is not found"
-        })
-      } else if (err) {
-        sendJsonResponse(res, 400, err);
-      } else {
-        addTask(req, res, board);
-      }
-    });
-
-};
-
-//function for add task in list
-let addTask = (req, res, board) => {
-
-  //check task information
-  let listid = req.params.listid;
+// function for add task in list
+const addTask = (req, res, board) => {
+  // check task information
+  const { listid } = req.params;
   if (!listid) {
     sendJsonResponse(res, 400, {
-      "message": "Listid is required"
+      message: 'Listid is required',
     });
     return;
   }
 
-  //find list by id
-  let list = board.lists.id(listid);
+  // find list by id
+  const list = board.lists.id(listid);
   if (!list) {
     sendJsonResponse(res, 404, {
-      "message": "List not found"
+      message: 'List not found',
     });
   } else {
-
-    //add task on the top or bottom
-    if (req.body.side === 'top' ) {
+    // add task on the top or bottom
+    if (req.body.side === 'top') {
       list.tasks.unshift({
-        taskName: req.body.taskName
+        taskName: req.body.taskName,
       });
     } else {
       list.tasks.push({
-        taskName: req.body.taskName
+        taskName: req.body.taskName,
       });
     }
     board.save((err, data) => {
       if (err) {
         sendJsonResponse(res, 404, err);
       } else {
-        let { tasks } = data.lists.id(listid);
+        const { tasks } = data.lists.id(listid);
         let task;
-        if (req.body.side === 'top' ) {
-          task = tasks[0];
+        if (req.body.side === 'top') {
+          // eslint-disable-next-line prefer-destructuring
+          [task] = tasks;
         } else {
-          task = tasks[tasks.length-1];
+          task = tasks[tasks.length - 1];
         }
         sendJsonResponse(res, 201, task);
       }
-    })
+    });
   }
-
 };
 
-//update task
+// create task in list
+module.exports.createTask = (req, res) => {
+  const { boardid, listid } = req.params;
+  const { taskName } = req.body;
+
+  // check task information
+  if (!taskName) {
+    sendJsonResponse(res, 400, {
+      message: "Task name format: {'taskName': 'name'}",
+    });
+    return;
+  }
+  if (!boardid || !listid) {
+    sendJsonResponse(res, 400, {
+      message: 'BoardID and listID are both required',
+    });
+    return;
+  }
+
+  // find board by id
+  Board.findById(boardid)
+    .select('lists')
+    .exec((err, board) => {
+      if (!board) {
+        sendJsonResponse(res, 404, {
+          message: 'Board is not found',
+        });
+      } else if (err) {
+        sendJsonResponse(res, 400, err);
+      } else {
+        addTask(req, res, board);
+      }
+    });
+};
+
+// update task
 module.exports.updateTask = (req, res) => {
+  const {
+    taskName: newTaskName,
+    description: newTaskDescription,
+    date: newTaskDate,
+    status: newTaskStatus,
+  } = req.body;
+  const { boardid, listid, taskid } = req.params;
 
-  const { taskName: newTaskName, description: newTaskDescription, date: newTaskDate, status: newTaskStatus } = req.body;
-  const { boardid, listid, taskid} = req.params;
-
-  //check task information
+  // check task information
   if (!boardid || !listid || !taskid) {
     sendJsonResponse(res, 400, {
-      "message": "BoardID, listID and taskID are all required"
+      message: 'BoardID, listID and taskID are all required',
     });
     return;
   }
   if (!newTaskDate && newTaskDate !== null) {
     sendJsonResponse(res, 400, {
-      "message": "Wrong task date format"
+      message: 'Wrong task date format',
     });
     return;
   }
   if (newTaskStatus !== true && newTaskStatus !== false) {
     sendJsonResponse(res, 400, {
-      "message": "Wrong task status format"
+      message: 'Wrong task status format',
     });
     return;
   }
 
-  //find board by id
+  // find board by id
   Board.findById(boardid)
     .select('lists')
     .exec((err, board) => {
-
-      //check board
+      // check board
       if (!board) {
         sendJsonResponse(res, 404, {
-          "message": "Board is not found"
+          message: 'Board is not found',
         });
         return;
-      } else if (err) {
+      }
+      if (err) {
         sendJsonResponse(res, 404, err);
         return;
       }
 
-      //find list by id
-      let list = board.lists.id(listid);
+      // find list by id
+      const list = board.lists.id(listid);
       if (!list) {
         sendJsonResponse(res, 404, {
-          "message": "List is not found"
+          message: 'List is not found',
         });
         return;
       }
 
-      //find task by id if it exists
+      // find task by id if it exists
       if (list.tasks && list.tasks.length > 0) {
-        let task = list.tasks.id(taskid);
+        const task = list.tasks.id(taskid);
         if (!task) {
           sendJsonResponse(res, 404, {
-            "message": "Task is not found"
+            message: 'Task is not found',
           });
         } else {
-
-          //update task information and save board
-          newTaskName ? task.taskName = newTaskName : task.taskName;
-          newTaskDescription ? task.description = newTaskDescription : task.description = '';
-          newTaskDate === null ? task.date = null : task.date = newTaskDate;
-          newTaskStatus === true ? task.status = true : task.status = false;
-          board.save((err, board) => {
-            if (err) {
-              sendJsonResponse(res, 404, err);
+          // update task information and save board
+          // eslint-disable-next-line no-unused-expressions
+          newTaskName ? (task.taskName = newTaskName) : task.taskName;
+          // eslint-disable-next-line no-unused-expressions
+          newTaskDescription
+            ? (task.description = newTaskDescription)
+            : (task.description = '');
+          // eslint-disable-next-line no-unused-expressions
+          newTaskDate === null ? (task.date = null) : (task.date = newTaskDate);
+          // eslint-disable-next-line no-unused-expressions
+          newTaskStatus === true ? (task.status = true) : (task.status = false);
+          board.save((error, boardInfo) => {
+            if (error) {
+              sendJsonResponse(res, 404, error);
             } else {
-              let newList = board.lists.id(listid);
-              let newTask = newList.tasks.id(taskid);
+              const newList = boardInfo.lists.id(listid);
+              const newTask = newList.tasks.id(taskid);
               sendJsonResponse(res, 200, newTask);
             }
-          })
+          });
         }
       } else {
         sendJsonResponse(res, 404, {
-          "message": "Tasks is not found"
+          message: 'Tasks is not found',
         });
       }
-    })
-
+    });
 };
 
-//delete task
+// delete task
 module.exports.deleteTask = (req, res) => {
+  const { boardid, listid, taskid } = req.params;
 
-  const { boardid, listid, taskid} = req.params;
-
-  //check task information
+  // check task information
   if (!boardid || !listid || !taskid) {
     sendJsonResponse(res, 400, {
-      "message": "BoardID, listID and taskID are all required"
+      message: 'BoardID, listID and taskID are all required',
     });
     return;
   }
 
-  //find board by id
+  // find board by id
   Board.findById(boardid)
     .select('lists')
     .exec((err, board) => {
-
-    //check board
+      // check board
       if (!board) {
         sendJsonResponse(res, 404, {
-          "message": "Board is not found"
+          message: 'Board is not found',
         });
         return;
-      } else if (err) {
+      }
+      if (err) {
         sendJsonResponse(res, 400, err);
         return;
       }
 
-      //find list by id
-      let list = board.lists.id(listid);
+      // find list by id
+      const list = board.lists.id(listid);
       if (!list) {
         sendJsonResponse(res, 404, {
-          "message": "List is not found"
+          message: 'List is not found',
         });
         return;
       }
 
-      //find task by id if it exists
+      // find task by id if it exists
       if (list.tasks && list.tasks.length > 0) {
-        let task = list.tasks.id(taskid);
+        const task = list.tasks.id(taskid);
         if (!task) {
           sendJsonResponse(res, 404, {
-            "message": "Task is not found"
+            message: 'Task is not found',
           });
         } else {
-
-          //remove task from db and folders with attachments
-          let taskDirectoryPath = `app_client/lib/images/board_${boardid}/${list.listName}_${listid}/${task.taskName}_${taskid}`;
+          // remove task from db and folders with attachments
+          const taskDirectoryPath = `app_client/lib/images/board_${boardid}/${list.listName}_${listid}/${task.taskName}_${taskid}`;
           task.remove();
           fs.removeSync(taskDirectoryPath);
-          board.save((err) => {
-            if (err) {
-              sendJsonResponse(res, 404, err);
+          board.save(error => {
+            if (error) {
+              sendJsonResponse(res, 404, error);
             } else {
               sendJsonResponse(res, 204, null);
             }
-          })
+          });
         }
       } else {
         sendJsonResponse(res, 404, {
-          "message": "Tasks is not found"
+          message: 'Tasks is not found',
         });
       }
     });
-
 };
